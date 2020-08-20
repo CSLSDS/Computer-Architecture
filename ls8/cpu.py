@@ -78,7 +78,7 @@ class CPU:
             #print(f'##LS8## CMD = self.ram_read(self.pc) ({bin(cmd)})')
 
             if cmd == self.LDI:
-                print(f'\n##LS8## LDI # load immediate {bin(cmd)}')
+                print(f'##LS8##\n##LS8## LDI # load immediate {bin(cmd)}')
                 regix = self.ram[self.pc + 1]
                 print(f'##LS8## {bin(self.ram[self.pc+1])}     regix = self.ram[self.pc + 1] ({regix})')
                 num2reg = self.ram[self.pc + 2]
@@ -89,8 +89,8 @@ class CPU:
 
             elif cmd == self.PRN:
                 regix = self.ram[self.pc + 1]
-                print(f'\n##LS8## PRN # {bin(cmd)}')
-                print(f'##LS8## {bin(self.ram[self.pc + 1])}    print register index ({self.ram[self.pc + 1]})\n')
+                print(f'##LS8##\n##LS8## PRN # {bin(cmd)}')
+                print(f'##LS8## {bin(self.ram[self.pc + 1])}    print register index ({self.ram[self.pc + 1]})\n##LS8##')
                 print(self.reg[regix])
                 self.op_size = cmd >> 6
 
@@ -99,7 +99,7 @@ class CPU:
                 reg_b = self.ram[self.pc + 2]
 
                 self.alu('MUL', reg_a, reg_b)
-                print(f'\n##LS8## MUL # {bin(cmd)}')
+                print(f'##LS8##\n##LS8## MUL # {bin(cmd)}')
                 # TODO add appropriate lines for verbose output == len(operation)
                 print(f'##LS8##     multiply : {reg_a} * {reg_b}')
 
@@ -110,7 +110,7 @@ class CPU:
                 sp = self.reg[7] # store value 
                 value = self.reg[self.ram_read(self.pc + 1)]
                 self.ram_write(sp, value)
-                print(f'\n##LS8## PUSH # {bin(cmd)}')
+                print(f'##LS8##\n##LS8## PUSH # {bin(cmd)}')
                 print(f'##LS8## {bin(value)} push {value} (to RAM index {sp})')
                 self.op_size = cmd >> 6
             
@@ -121,16 +121,16 @@ class CPU:
                 self.reg[self.ram_read(self.pc + 1)] = value
                 # increment to reduce/shift stack by one
                 self.reg[7] += 1
-                print(f'\n##LS8## POP # {bin(cmd)}')
+                print(f'##LS8##\n##LS8## POP # {bin(cmd)}')
                 print(f'##LS8## {bin(self.ram_read(sp))} pop {value} into self.reg[{self.ram_read(self.pc + 1)}]')
                 self.op_size = cmd >> 6
 
             elif cmd == self.HLT:
                 running = False
                 self.op_size = cmd >> 6
-                print(f'\n##LS8## HLT # {bin(cmd)}')
-                print(f'##LS8##     halting!\n')
+                print(f'##LS8##\n##LS8## HLT # {bin(cmd)}')
+                print(f'##LS8##     halting!\n##LS8## END')
             
-            print(f'\n##LS8###### incrementing program counter ({self.op_size + 1} lines/bytes/cmds)')
+            print(f'##LS8##\n##LS8###### incrementing program counter ({self.op_size + 1} lines/bytes/cmds)')
             self.pc += (self.op_size + 1)
             print(f'##LS8###### program counter {self.pc}')
