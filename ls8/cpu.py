@@ -13,6 +13,7 @@ class CPU:
         self.pc = 0 # bitct bit count ticks runtime lines prog counter
         self.reg = [0] * 8
         self.reg[SP] = 0xf4
+        self.FL = 0
         #self.op_size = 1
         self.LDI =  0b10000010
         self.PRN =  0b01000111
@@ -23,6 +24,11 @@ class CPU:
         self.CALL = 0b01010000
         self.RET =  0b00010001
         self.ADD =  0b10100000
+        # TODO SC CMP - JEQ - JNE - JMP
+        self.CMP =  0b10100111
+        self.JEQ =  0b01010101
+        self.JNE =  0b01010110
+        self.JMP =  0b01010100
 
     def load(self, program):
         """Load a program into memory."""
@@ -46,6 +52,13 @@ class CPU:
             self.reg[reg_a] -= self.reg[reg_b]
         elif op == 'MUL':
             self.reg[reg_a] *= self.reg[reg_b]
+        elif op == 'CMP':
+            if self.reg[reg_a] == self.reg[reg_b]:
+                self.FL = 1
+            elif self.reg[reg_a] > self.reg[reg_b]:
+                self.FL = 2
+            else:
+                self.FL = 4
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -166,6 +179,47 @@ class CPU:
                 self.reg[SP] += 1
                 ## SETPC = TRUE
 
+            elif cmd == self.CMP:
+                # compare
+                reg_a = self.ram[self.pc + 1]
+                reg_b = self.ram[self.pc + 2]
+                self.alu('CMP', reg_a, reg_b)
+                print(f'##LS8##\n##LS8## CMP # {bin(cmd)}')
+                # TODO add appropriate lines for verbose output == len(operation)
+                print(f'##LS8##     compare : {self.reg[reg_a]} and {self.reg[reg_b]}\n##LS8##')
+                #self.op_size = cmd >> 6
+                ## SETPC = FALSE
+
+            elif cmd == self.JMP:
+                # jump
+                print(f'##LS8##\n##LS8## JMP # {bin(cmd)}')
+                print(f'##LS8##    jump {bin(self.ram[self.pc + 1])}')
+                self.pc = self.reg[self.ram[self.pc + 1]]
+                ## SETPC = TRUE
+
+            elif cmd == self.JEQ:
+                # jump if equal
+                print(f'##LS8##\n##LS8## JEQ # {bin(cmd)}')
+                if self.FL & 0b1: # if CMP and equal
+                    print(f'##LS8##    jump to specified {bin(self.ram[self.pc+1])}\n##LS8##')
+                    self.pc = self.reg[self.ram[self.pc+1]] # jump to given
+                else:
+                    print(f'##LS8##    else jump next {bin(self.ram[self.pc+2])}\n##LS8##')
+                    self.pc += 2 # else skip forward/cont
+                ## SETPC = TRUE
+
+            elif cmd == self.JNE:
+                # jump if not equal
+                print(f'##LS8##\n##LS8## JNE # {bin(cmd)}')
+                print(f'##LS8## self.FL flag = {bin(self.FL)}')
+                if not self.FL & 0b1: # if CMP and not equal:
+                    print(f'##LS8##    not eq; jump to {bin(self.ram[self.pc + 1])}\n##LS8##')
+                    self.pc = self.reg[self.ram[self.pc+1]] # jump to given
+                else:
+                    print(f'##LS8##    else jump next {bin(self.ram[self.pc + 2])}\n##LS8##')
+                    self.pc += 2 # else skip fw/continue
+                ## SETPC = TRUE
+
             elif cmd == self.HLT:
                 running = False
                 #self.op_size = cmd >> 6
@@ -183,3 +237,5 @@ class CPU:
             print(f'##LS8######     program counter {self.pc}')
             print(f'##LS8######     TOP of RAM {[item for item in self.ram[0xf0:0xf6]]}')
             print(f'##LS8######     val at SP {self.ram_read(self.reg[SP])}')
+            print(f'##LS8######     registers {self.reg}')
+            
