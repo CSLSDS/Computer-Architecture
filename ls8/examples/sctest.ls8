@@ -76,4 +76,7 @@
 01000111 # PRN R3
 00000011
 # TEST5 (address 73):
+10000000 # ADDI R0,2    ###
+00000000 # R0           ### these lines added to test ADDI
+00000010 # 2            ### functionality for stretch
 00000001 # HLT
